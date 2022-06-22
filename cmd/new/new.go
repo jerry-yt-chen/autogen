@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"autogen/generator"
+	"github.com/jerry-yt-chen/autogen/generator"
 )
 
 func Cmd() *cobra.Command {

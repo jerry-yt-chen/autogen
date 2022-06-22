@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"autogen/cmd"
+	"github.com/jerry-yt-chen/autogen/cmd"
 )
 
 var Gopath string

@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"autogen/cmd/new"
+	"github.com/jerry-yt-chen/autogen/cmd/new"
 )
 
 func Execute() {
