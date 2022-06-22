@@ -1,4 +1,4 @@
-module autogen
+module github.com/jerry-yt-chen/autogen
 
 go 1.17
 
