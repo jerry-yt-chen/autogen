@@ -1,0 +1,23 @@
+package middlewares
+
+import (
+	"github.com/17media/api/base/ctx"
+	"github.com/17media/logrus"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+)
+
+// AddContext for generating ctx.CTX instance and providing default log fields
+func AddContext(c *gin.Context) {
+	lf := getDefaultLogFields(c)
+	cont := ctx.WithValues(ctx.Background(), lf)
+	c.Set("ctx", cont)
+	c.Next()
+}
+
+func getDefaultLogFields(c *gin.Context) logrus.Fields {
+	return logrus.Fields{
+		"requestID": uuid.NewString(),
+		"method":    c.Request.Method,
+	}
+}

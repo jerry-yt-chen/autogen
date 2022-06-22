@@ -1,0 +1,11 @@
+package domain
+
+import (
+	"github.com/google/wire"
+
+	userRepo "github.com/17media/{{.ProjectName}}/internal/domain/user/repo"
+)
+
+var RepositorySet = wire.NewSet(
+	userRepo.ProvideRepoStub,
+)

@@ -1,0 +1,13 @@
+package engine
+
+import (
+	"net/http"
+
+	"github.com/17media/{{.ProjectName}}/internal/framework/router"
+)
+
+type HttpEngine interface {
+	Init(r router.Router)
+	StartServer()
+	ServeHTTP(w http.ResponseWriter, req *http.Request)
+}

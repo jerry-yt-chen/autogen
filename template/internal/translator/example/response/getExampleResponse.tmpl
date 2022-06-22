@@ -1,0 +1,25 @@
+package response
+
+import (
+	"github.com/17media/api/base/ctx"
+
+	"github.com/17media/{{.ProjectName}}/internal/domain/user/model"
+	api "github.com/17media/{{.ProjectName}}/internal/framework/engine/gin/render"
+)
+
+type GetExampleRes struct {
+	User model.UserInfo `json:"user"`
+}
+
+type ConvertParams struct {
+	UserInfo model.UserInfo
+}
+
+func NewGetExampleRes() *GetExampleRes {
+	return &GetExampleRes{}
+}
+func (r *GetExampleRes) Convert(_ ctx.CTX, input interface{}) *api.AppError {
+	params := input.(ConvertParams)
+	r.User = params.UserInfo
+	return nil
+}

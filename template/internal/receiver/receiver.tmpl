@@ -1,0 +1,31 @@
+package receiver
+
+import (
+	"github.com/gin-gonic/gin"
+
+	"github.com/17media/{{.ProjectName}}/internal/framework/middlewares"
+)
+
+type Receiver interface {
+	GetRouteInfos() []RouteInfo
+}
+
+type RouteInfo struct {
+	Method      string
+	Path        string
+	Middlewares []gin.HandlerFunc
+	Handler     gin.HandlerFunc
+}
+
+func (r *RouteInfo) GetFlow() []gin.HandlerFunc {
+	var flow []gin.HandlerFunc
+	// Append common translations here
+	flow = append(flow, middlewares.AddContext)
+
+	// Append specific middleware here
+	flow = append(flow, r.Middlewares...)
+
+	// Append handler
+	flow = append(flow, r.Handler)
+	return flow
+}

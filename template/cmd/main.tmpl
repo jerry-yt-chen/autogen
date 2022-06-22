@@ -1,0 +1,19 @@
+package main
+
+import (
+	"github.com/17media/{{.ProjectName}}/configs"
+	"github.com/17media/{{.ProjectName}}/internal/injector"
+)
+
+func main() {
+	configs.InitConfigs()
+
+	injector, cleanup, err := injector.BuildInjector()
+	if err != nil {
+		panic("Fail to build injector")
+	}
+	defer cleanup()
+
+	// start http server
+	injector.HttpEngine.StartServer()
+}

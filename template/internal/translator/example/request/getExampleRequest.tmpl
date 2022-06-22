@@ -1,0 +1,28 @@
+package request
+
+import (
+	"github.com/17media/api/base/ctx"
+
+	api "github.com/17media/{{.ProjectName}}/internal/framework/engine/gin/render"
+)
+
+type GetExampleReq struct {
+	// headers
+
+	// queries
+
+	// body
+}
+
+func NewGetExampleReq() *GetExampleReq {
+	return &GetExampleReq{}
+}
+
+func (r *GetExampleReq) Validate(context ctx.CTX) *api.AppError {
+	//TODO validate request parameters here
+	return nil
+}
+
+func (r *GetExampleReq) Extract(context ctx.CTX) {
+	//TODO Fill parameters to req object here
+}

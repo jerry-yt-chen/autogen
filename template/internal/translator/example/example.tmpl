@@ -1,0 +1,14 @@
+package example
+
+import (
+	"github.com/17media/api/base/ctx"
+	"github.com/gin-gonic/gin"
+
+	api "github.com/17media/{{.ProjectName}}/internal/framework/engine/gin/render"
+	"github.com/17media/{{.ProjectName}}/internal/translator"
+)
+
+type Translator interface {
+	ParseGetExampleReq(*gin.Context) (ctx.CTX, translator.Request, *api.AppError)
+	ProcessGetExample(ctx.CTX, translator.Request) (translator.Response, *api.AppError)
+}

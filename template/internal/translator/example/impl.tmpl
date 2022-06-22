@@ -1,0 +1,45 @@
+package example
+
+import (
+	"github.com/17media/api/base/ctx"
+	"github.com/gin-gonic/gin"
+
+	"github.com/17media/{{.ProjectName}}/internal/dispatcher/user"
+	api "github.com/17media/{{.ProjectName}}/internal/framework/engine/gin/render"
+	"github.com/17media/{{.ProjectName}}/internal/translator"
+	"github.com/17media/{{.ProjectName}}/internal/translator/example/request"
+	"github.com/17media/{{.ProjectName}}/internal/translator/example/response"
+)
+
+type impl struct {
+	dispatcher user.Dispatcher
+}
+
+func ProvideTranslator(dispatcher user.Dispatcher) Translator {
+	return &impl{
+		dispatcher: dispatcher,
+	}
+}
+
+func (im *impl) ParseGetExampleReq(c *gin.Context) (ctx.CTX, translator.Request, *api.AppError) {
+	context := c.MustGet("ctx").(ctx.CTX)
+	req := request.NewGetExampleReq()
+	return context, req, nil
+}
+
+func (im *impl) ProcessGetExample(ctx ctx.CTX, req translator.Request) (translator.Response, *api.AppError) {
+	result, err := im.dispatcher.GetExample(ctx, req.(*request.GetExampleReq))
+	if err != nil {
+		return nil, api.NewProcessError(err.Error())
+	}
+
+	res := response.NewGetExampleRes()
+	params := response.ConvertParams{
+		UserInfo: result,
+	}
+
+	if err := res.Convert(ctx, params); err != nil {
+		return nil, err
+	}
+	return res, nil
+}

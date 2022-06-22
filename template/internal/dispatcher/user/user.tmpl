@@ -1,0 +1,12 @@
+package user
+
+import (
+	"github.com/17media/api/base/ctx"
+
+	"github.com/17media/{{.ProjectName}}/internal/domain/user/model"
+	"github.com/17media/{{.ProjectName}}/internal/translator/example/request"
+)
+
+type Dispatcher interface {
+	GetExample(ctx.CTX, *request.GetExampleReq) (model.UserInfo, error)
+}

@@ -1,0 +1,13 @@
+package injector
+
+import (
+	"github.com/google/wire"
+
+	"github.com/17media/{{.ProjectName}}/internal/framework/engine"
+)
+
+var InjectorSet = wire.NewSet(wire.Struct(new(Injector), "*"))
+
+type Injector struct {
+	HttpEngine engine.HttpEngine
+}

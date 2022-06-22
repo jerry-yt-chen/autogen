@@ -1,0 +1,19 @@
+package translator
+
+import (
+	"github.com/17media/api/base/ctx"
+
+	api "github.com/17media/{{.ProjectName}}/internal/framework/engine/gin/render"
+)
+
+type Request interface {
+	//Validate is for checking request parameters format
+	Validate(ctx ctx.CTX) *api.AppError
+	//Extract is for extracting some request parameters into specific values.
+	Extract(ctx ctx.CTX)
+}
+
+type Response interface {
+	//Convert is for converting business model to response model
+	Convert(ctx ctx.CTX, input interface{}) *api.AppError
+}

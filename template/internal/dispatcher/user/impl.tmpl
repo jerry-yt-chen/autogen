@@ -1,0 +1,28 @@
+package user
+
+import (
+	"github.com/17media/api/base/ctx"
+
+	"github.com/17media/{{.ProjectName}}/internal/domain/user/model"
+	userRepo "github.com/17media/{{.ProjectName}}/internal/domain/user/repo"
+	"github.com/17media/{{.ProjectName}}/internal/translator/example/request"
+)
+
+type impl struct {
+	repo userRepo.Repository
+}
+
+func (im impl) GetExample(c ctx.CTX, req *request.GetExampleReq) (model.UserInfo, error) {
+	res, _ := im.repo.GetUserInfo("hhh")
+	return model.UserInfo{
+		Name:   res.Name,
+		Gender: res.Gender,
+		Age:    res.Age,
+	}, nil
+}
+
+func ProvideDispatcher(repo userRepo.Repository) Dispatcher {
+	return &impl{
+		repo: repo,
+	}
+}

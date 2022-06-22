@@ -1,0 +1,19 @@
+package repo
+
+import "github.com/17media/{{.ProjectName}}/internal/domain/user/entity"
+
+type RepositoryStub struct {
+}
+
+func ProvideRepoStub() Repository {
+	return &RepositoryStub{}
+}
+
+func (r RepositoryStub) GetUserInfo(userID string) (entity.User, error) {
+	return entity.User{
+		UserId: userID,
+		Name:   "Ozzy Osbourne",
+		Age:    74,
+		Gender: "male",
+	}, nil
+}

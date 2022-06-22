@@ -1,0 +1,9 @@
+package repo
+
+import (
+	"github.com/17media/{{.ProjectName}}/internal/domain/user/entity"
+)
+
+type Repository interface {
+	GetUserInfo(userID string) (entity.User, error)
+}

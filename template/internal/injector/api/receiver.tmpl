@@ -1,0 +1,16 @@
+package api
+
+import (
+	"github.com/google/wire"
+
+	"github.com/17media/{{.ProjectName}}/internal/receiver"
+	"github.com/17media/{{.ProjectName}}/internal/receiver/example"
+)
+
+var ReceiverSet = wire.NewSet(
+	example.ProvideReceiver,
+)
+
+func ProvideReceiverList(u example.Receiver) []receiver.Receiver {
+	return []receiver.Receiver{u}
+}

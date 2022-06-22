@@ -1,0 +1,47 @@
+package example
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	api "github.com/17media/{{.ProjectName}}/internal/framework/engine/gin/render"
+	"github.com/17media/{{.ProjectName}}/internal/receiver"
+	trans "github.com/17media/{{.ProjectName}}/internal/translator/example"
+)
+
+type impl struct {
+	translator trans.Translator
+}
+
+func ProvideReceiver(trans trans.Translator) Receiver {
+	return &impl{
+		translator: trans,
+	}
+}
+
+func (im *impl) getExample(c *gin.Context) {
+	context, req, err := im.translator.ParseGetExampleReq(c)
+	if err != nil {
+		api.ResFailResult(c, err.Code, err.ErrCode, err.Message)
+		return
+	}
+
+	result, err := im.translator.ProcessGetExample(context, req)
+	if err != nil {
+		api.ResFailResult(c, err.Code, err.ErrCode, err.Message)
+		return
+	}
+	api.ResSuccess(c, http.StatusOK, result)
+}
+
+func (im *impl) GetRouteInfos() []receiver.RouteInfo {
+	return []receiver.RouteInfo{
+		{
+			Method:      http.MethodGet,
+			Path:        "/example",
+			Middlewares: nil,
+			Handler:     im.getExample,
+		},
+	}
+}

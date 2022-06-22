@@ -1,0 +1,13 @@
+package api
+
+import (
+	"github.com/17media/{{.ProjectName}}/internal/framework/engine"
+	ginEngine "github.com/17media/{{.ProjectName}}/internal/framework/engine/gin"
+	"github.com/17media/{{.ProjectName}}/internal/framework/router"
+)
+
+func InitGinEngine(r router.Router) engine.HttpEngine {
+	engine := ginEngine.NewEngine()
+	engine.Init(r)
+	return engine
+}

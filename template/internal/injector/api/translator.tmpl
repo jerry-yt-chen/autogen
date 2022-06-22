@@ -1,0 +1,11 @@
+package api
+
+import (
+	"github.com/google/wire"
+
+	"github.com/17media/{{.ProjectName}}/internal/translator/example"
+)
+
+var TranslatorSet = wire.NewSet(
+	example.ProvideTranslator,
+)
