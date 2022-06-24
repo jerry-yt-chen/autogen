@@ -1,15 +1,14 @@
 package cmd
 
 import (
+	"embed"
 	"os"
 
 	"github.com/spf13/cobra"
-
-	"github.com/jerry-yt-chen/autogen/cmd/new"
 )
 
-func Execute() {
-	rootCmd := cmd()
+func Execute(f embed.FS) {
+	rootCmd := cmd(f)
 	err := rootCmd.Execute()
 	if err == nil {
 		return
@@ -17,14 +16,14 @@ func Execute() {
 	os.Exit(-1)
 }
 
-func cmd() *cobra.Command {
+func cmd(f embed.FS) *cobra.Command {
 	rootCmd := &cobra.Command{
 		SilenceErrors: true,
 		Use:           "autogen",
 		Short:         "generate project",
 	}
 
-	newCmd := new.Cmd()
-	rootCmd.AddCommand(newCmd)
+	newCmd := ProvideNewCmd(f)
+	rootCmd.AddCommand(newCmd.Command())
 	return rootCmd
 }
