@@ -5,6 +5,6 @@ services:
     restart: always
     build:
       context: ..
-      dockerfile: ./build/Dockerfile
+      dockerfile: ../../templates/build/Dockerfile
     ports:
       - "3000:3000"

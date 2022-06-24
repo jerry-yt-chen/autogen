@@ -1,21 +1,28 @@
 package new
 
 import (
+	"embed"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 
+	"github.com/jerry-yt-chen/autogen/cmd"
 	"github.com/jerry-yt-chen/autogen/generator"
 )
 
-func Cmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:  "new",
-		RunE: runE,
-	}
+type impl struct {
+	*cobra.Command
+	Fs embed.FS
+}
 
+func ProvideNewCmd(files embed.FS) cmd.Cmd {
+	cmd := &impl{}
+
+	cmd.Use = "new"
+	cmd.RunE = runE
+	cmd.Fs = files
 	return cmd
 }
 
