@@ -39,13 +39,11 @@ func (g *ProjectGenerator) Generate() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(currPath)
 	templateSets, err := g.getTemplates()
 	if err != nil {
 		fmt.Println("getTemplates: ", err.Error())
 		return err
 	}
-	//fmt.Println("templateSets: ", templateSets)
 	d := data{
 		AbsGenProjectPath: currPath,
 		ProjectPath:       "github.com/17media/" + projectName,
@@ -55,7 +53,7 @@ func (g *ProjectGenerator) Generate() error {
 
 	for _, tmpl := range templateSets {
 		if err = g.gen(tmpl, d); err != nil {
-			fmt.Println(err.Error())
+			return err
 		}
 	}
 	return nil
@@ -99,19 +97,13 @@ func (g *ProjectGenerator) genFromTemplate(templateSets []templateSet, d data, f
 }
 
 func (g *ProjectGenerator) gen(tmplSet templateSet, d data) error {
-	fmt.Println("gen")
 	tmpl := template.New(tmplSet.templateFileName)
 	tmpl = tmpl.Funcs(template.FuncMap{"unescaped": func(x string) interface{} {
 		return template.HTML(x)
 	}})
 
-	fmt.Println("tmplSet.templateFilePath: ", tmplSet.templateFilePath)
-	dat, err := os.ReadFile(tmplSet.templateFilePath)
-	fmt.Println("abc: ", string(dat))
-
-	tmpl, err = tmpl.ParseFS(g.f, tmplSet.templateFilePath)
+	tmpl, err := tmpl.ParseFS(g.f, tmplSet.templateFilePath)
 	if err != nil {
-		fmt.Println("fuckoff")
 		return pkgErr.WithStack(err)
 	}
 
