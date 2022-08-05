@@ -4,7 +4,7 @@ services:
     image: {{.ProjectName}}:latest
     restart: always
     build:
-      context: ..
+      context: ../..
       dockerfile: ../../templates/build/Dockerfile
     ports:
       - "3000:3000"
