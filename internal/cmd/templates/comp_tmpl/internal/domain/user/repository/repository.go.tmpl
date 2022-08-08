@@ -1,0 +1,9 @@
+package repository
+
+import (
+	"github.com/17media/{{.ProjectName}}/internal/domain/user/entity"
+)
+
+type Repository interface {
+	GetGreeter() (entity.User, error)
+}

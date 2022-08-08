@@ -1,0 +1,7 @@
+package greeter
+
+import pb "github.com/17media/{{.ProjectName}}/api/protos/greeter/v1"
+
+type Receiver interface {
+	pb.GreeterServiceServer
+}

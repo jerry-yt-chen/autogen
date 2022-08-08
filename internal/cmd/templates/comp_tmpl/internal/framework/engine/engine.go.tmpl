@@ -1,0 +1,7 @@
+package engine
+
+import "github.com/17media/{{.ProjectName}}/internal/receiver/greeter"
+
+type Engine interface {
+	StartGRPCServer(svc greeter.Receiver)
+}

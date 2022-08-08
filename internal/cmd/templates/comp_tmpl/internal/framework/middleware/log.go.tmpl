@@ -1,0 +1,50 @@
+package middleware
+
+import (
+	"context"
+	"time"
+
+	"github.com/17media/logrus"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
+)
+
+//AccessLog logs the request method, request time and processing time.
+func AccessLog(ctx context.Context,
+	req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+
+	context := GetContext(ctx)
+	beginTime := time.Now().Unix()
+	context.Info("requestID: ", context.Value("requestID"))
+	context.WithFields(logrus.Fields{
+		"method":  info.FullMethod,
+		"request": req,
+	}).Info("access request")
+
+	resp, err := handler(ctx, req)
+
+	endTime := time.Now().Unix()
+	context.WithFields(logrus.Fields{
+		"method":      info.FullMethod,
+		"processTime": endTime - beginTime,
+		"response":    resp,
+	}).Info("ready response")
+	return resp, err
+}
+
+//ErrorLog logs error info if there is an error while processing.
+func ErrorLog(ctx context.Context,
+	req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+
+	resp, err := handler(ctx, req)
+	s, ok := status.FromError(err)
+	if !ok {
+		context := GetContext(ctx)
+		context.WithFields(logrus.Fields{
+			"method":  info.FullMethod,
+			"errCode": s.Code(),
+			"err":     s.Err().Error(),
+		}).Error(s.Details())
+	}
+	return resp, err
+}

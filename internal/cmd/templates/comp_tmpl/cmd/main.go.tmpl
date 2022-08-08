@@ -1,0 +1,34 @@
+package main
+
+import (
+	"fmt"
+	"net/http"
+	"runtime"
+
+	"github.com/17media/logrus"
+
+	"github.com/17media/{{.ProjectName}}/configs"
+	"github.com/17media/{{.ProjectName}}/internal/injector"
+)
+
+func main() {
+	// prevent init run before testing https://github.com/golang/go/issues/31859
+	configs.InitConfigs()
+
+	if configs.C.App.ProfilePort != 0 {
+		logrus.Info("profile open")
+		runtime.SetBlockProfileRate(1)
+		go func() {
+			_ = http.ListenAndServe(fmt.Sprintf(":%d", configs.C.App.ProfilePort), nil)
+		}()
+	}
+
+	// init injector
+	injector, err := injector.BuildInjector()
+	if err != nil {
+		logrus.WithField("err", err).Panic("failed to build injector")
+	}
+
+	// start grpc server
+	injector.Engine.StartGRPCServer(injector.Receiver)
+}

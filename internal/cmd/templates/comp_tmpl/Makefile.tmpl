@@ -1,0 +1,50 @@
+APP_NAME={{.ProjectName}}
+VERSION=latest
+GO_VERSION=1.17
+TEST_PATH=/go/app
+PWD=$(shell pwd)
+PROJECT=17media
+COMPOSE_FILE=deployments/docker-compose.yaml
+DOCKER_BUILD_PROGRESS=auto
+DOCKER_BUILD_SSH=$(HOME)/.ssh/id_rsa
+
+.PHONY: build
+build:
+	DOCKER_BUILDKIT=1 docker build --progress=$(DOCKER_BUILD_PROGRESS) --ssh main=$(DOCKER_BUILD_SSH) -t $(APP_NAME):$(VERSION) -f ./build/Dockerfile .
+
+.PHONY: run
+run: proto tidy di build
+	docker-compose -p $(PROJECT) -f $(COMPOSE_FILE) up -d
+
+.PHONY: stop
+stop:
+	docker-compose -p $(PROJECT) -f $(COMPOSE_FILE) down
+
+.PHONY: test
+test:
+	go test -race ./... -v
+
+.PHONY: proto
+proto:
+	buf lint && buf format -dw && buf generate
+
+.PHONY: di
+di:
+	go install github.com/google/wire/cmd/wire@v0.5.0
+	wire gen ./internal/injector
+
+.PHONY: mock
+mock:
+	go install github.com/golang/mock/mockgen@v1.6.0
+	go generate -x -run mockgen ./...
+
+.PHONY: lint
+lint:
+	@hash golangci-lint > /dev/null 2>&1; if [ $$? -ne 0 ]; then \
+		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.45.2; \
+	fi
+	golangci-lint run -v
+
+.PHONY: tidy
+tidy:
+	go mod tidy -compat=1.17
