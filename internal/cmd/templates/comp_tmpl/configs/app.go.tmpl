@@ -1,0 +1,17 @@
+package configs
+
+import (
+	"flag"
+)
+
+type AppConfig struct {
+	Host        string
+	Port        int
+	ProfilePort int
+}
+
+func appFlags() {
+	flag.StringVar(&C.App.Host, "app_host", "api", "app host")
+	flag.IntVar(&C.App.Port, "app_port", 50051, "app expose port")
+	flag.IntVar(&C.App.ProfilePort, "app_profile_port", 0, "app profile port")
+}

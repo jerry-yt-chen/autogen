@@ -1,0 +1,36 @@
+# {{.ProjectName}}
+
+## Prerequisite
+
+- Install [buf](https://docs.buf.build/installation#homebrew)
+  ```shell
+  $ brew tap bufbuild/buf
+  $ brew install buf
+  ```
+- Install [wire](https://github.com/google/wire)
+  ```shell
+  $ go get github.com/google/wire/cmd/wire
+  ```
+  ```shell
+  $ export PATH="$PATH:$GOPATH/bin"
+  ```
+
+## Commands
+
+- DI code generate
+  ```shell
+  $ make di
+  ```
+
+- protobuf code generate
+  ```shell
+  $ make proto
+  ```
+  
+- Run by docker-compose
+  ```shell
+  $ make run
+  
+  # Change private repo ssh key path for docker build
+  $ make run DOCKER_BUILD_SSH=$HOME/.ssh/id_rsa
+  ```

@@ -11,96 +11,25 @@ go install github.com/17media/autogen@latest
 
 ## Create new project:
 
-```sh
-mkdir <project-name>
-cd <project-name>
-autogen new
-```
-
-## Directory Structure
-
 ```shell
-├── Makefile
-├── README.md
-├── build
-│   ├── Dockerfile
-│   └── entrypoint.sh
-├── cmd
-│   └── main.go
-├── configs
-│   ├── config.go
-│   └── config.yaml
-├── deployments
-│   └── docker-compose.yaml
-├── go.mod
-└── internal
-    ├── dispatcher
-    │   └── user
-    │       ├── impl.go
-    │       └── user.go
-    ├── domain
-    │   └── user
-    │       ├── entity
-    │       │   └── entity.go
-    │       ├── model
-    │       │   └── model.go
-    │       └── repo
-    │           ├── repository.go
-    │           └── respositoryStub.go
-    ├── framework
-    │   ├── engine
-    │   │   ├── engine.go
-    │   │   └── gin
-    │   │       ├── ginEngine.go
-    │   │       └── render
-    │   │           ├── error.go
-    │   │           └── response.go
-    │   ├── middlewares
-    │   │   └── context.go
-    │   └── router
-    │       ├── ginRouter.go
-    │       └── router.go
-    ├── injector
-    │   ├── api
-    │   │   ├── dispatcher.go
-    │   │   ├── httpServer.go
-    │   │   ├── receiver.go
-    │   │   ├── router.go
-    │   │   └── translator.go
-    │   ├── domain
-    │   │   └── repository.go
-    │   ├── injector.go
-    │   ├── wire.go
-    │   └── wire_gen.go
-    ├── receiver
-    │   ├── example
-    │   │   ├── example.go
-    │   │   └── impl.go
-    │   └── receiver.go
-    └── translator
-        ├── example
-        │   ├── example.go
-        │   ├── impl.go
-        │   ├── request
-        │   │   └── getExampleRequest.go
-        │   └── response
-        │       └── getExampleResponse.go
-        └── translator.go
-
+//support type: 'category', 'comp' 
+autogen new <project-name> --type=<project-type>
 ```
 
 ## Test
 
+- category (API service type)
 ```shell
-cd <project-name>
+autogen new coke --type=category
+cd coke
 make stop && make run
 curl --request GET http://localhost:3000/api/v1/example
 ```
 
-## TODO
-- Support component service template
-- cli should also support args
+- category (API service type)
 ```shell
-autogen new proj category
-autoget new proj compnent
+autogen new coke-comp --type=comp
+cd coke-comp
+make stop && make run
+grpcurl -d '{"iam": "John"}' -plaintext  localhost:50051 greeter.v1.GreeterService/WhoAreYou
 ```

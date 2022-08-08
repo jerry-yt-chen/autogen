@@ -1,0 +1,32 @@
+package greeter
+
+import (
+	"context"
+	"fmt"
+
+	pb "github.com/17media/{{.ProjectName}}/api/protos/greeter/v1"
+	userRepo "github.com/17media/{{.ProjectName}}/internal/domain/user/repository"
+)
+
+type impl struct {
+	repo userRepo.Repository
+}
+
+func ProvideReceiver(repo userRepo.Repository) Receiver {
+	return &impl{
+		repo: repo,
+	}
+}
+
+func (im *impl) WhoAreYou(ctx context.Context, request *pb.WhoAreYouRequest) (*pb.WhoAreYouResponse, error) {
+	greeter, err := im.repo.GetGreeter()
+	if err != nil {
+		return nil, err
+	}
+	resUser := pb.User{
+		Name: greeter.Name,
+		Age:  greeter.Age,
+	}
+
+	return &pb.WhoAreYouResponse{User: &resUser, Message: fmt.Sprintf("Hi, %s! This is my info", request.Iam)}, nil
+}

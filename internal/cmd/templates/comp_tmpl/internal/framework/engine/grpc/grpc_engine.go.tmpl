@@ -1,0 +1,63 @@
+package grpc
+
+import (
+	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/17media/logrus"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/reflection"
+
+	pb "github.com/17media/{{.ProjectName}}/api/protos/greeter/v1"
+	"github.com/17media/{{.ProjectName}}/configs"
+	"github.com/17media/{{.ProjectName}}/internal/framework/engine"
+	"github.com/17media/{{.ProjectName}}/internal/receiver/greeter"
+)
+
+type Engine struct {
+}
+
+func NewEngine() engine.Engine {
+	return &Engine{}
+}
+
+func (g *Engine) StartGRPCServer(svc greeter.Receiver) {
+	address := fmt.Sprintf("%s:%d", configs.C.App.Host, configs.C.App.Port)
+	lis, err := net.Listen("tcp", address)
+	if err != nil {
+		logrus.WithField("err", err).Panic("failed to listen")
+	}
+
+	s := initServer()
+	pb.RegisterGreeterServiceServer(s, svc)
+	grpc_health_v1.RegisterHealthServer(s, health.NewServer())
+	reflection.Register(s)
+
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			logrus.WithField("err", err).Panic("failed to serve")
+		}
+	}()
+
+	// graceful shout down
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+
+	{{.Signal | unescaped}}
+	logrus.Info("shutting down server")
+
+	s.GracefulStop()
+}
+
+func initServer() *grpc.Server {
+	s := grpc.NewServer(grpc.UnaryInterceptor(
+		grpc_middleware.ChainUnaryServer()),
+	)
+	return s
+}

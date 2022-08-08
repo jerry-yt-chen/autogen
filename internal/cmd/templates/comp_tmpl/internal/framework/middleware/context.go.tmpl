@@ -1,0 +1,46 @@
+package middleware
+
+import (
+	"context"
+
+	"github.com/17media/api/base/ctx"
+	"github.com/17media/logrus"
+	"github.com/google/uuid"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+)
+
+// AddContext is for generating ctx.CTX instance and providing default log fields
+func AddContext(c context.Context,
+	req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+
+	lf := getDefaultLogFields(info)
+
+	// Extract requestID from requester
+	md, ok := metadata.FromIncomingContext(c)
+	if ok {
+		if val, ok := md["x-request-id"]; ok {
+			lf["requestID"] = val[0]
+		}
+	}
+	cont := ctx.WithValues(ctx.Background(), lf)
+	newCtx := context.WithValue(c, KeyContext, cont)
+	resp, err := handler(newCtx, req)
+	return resp, err
+}
+
+func getDefaultLogFields(info *grpc.UnaryServerInfo) logrus.Fields {
+	return logrus.Fields{
+		// requestID should come from upstream. If there is not any, just generate a new requestID for tracking
+		"requestID": uuid.NewString(),
+		"method":    info.FullMethod,
+	}
+}
+
+// GetContext is for getting ctx.CTX instance after calling AddContext()
+func GetContext(c context.Context) ctx.CTX {
+	if v, ok := c.Value(KeyContext).(ctx.CTX); ok {
+		return v
+	}
+	return ctx.Background()
+}
