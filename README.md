@@ -6,7 +6,7 @@ Before installing make sure you have the required dependencies installed:
 
 ## Installation
 ```sh
-go install github.com/jerry-yt-chen/autogen@latest
+go install github.com/17media/autogen@latest
 ```
 
 ## Create new project:

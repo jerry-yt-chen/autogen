@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/jerry-yt-chen/autogen/generator"
+	"github.com/17media/autogen/generator"
 )
 
 type NewCmd struct {

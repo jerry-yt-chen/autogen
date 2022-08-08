@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 
-	"github.com/jerry-yt-chen/autogen/cmd"
+	"github.com/17media/autogen/cmd"
 )
 
 //go:embed templates
