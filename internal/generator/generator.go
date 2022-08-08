@@ -2,15 +2,31 @@ package generator
 
 import (
 	"embed"
-	"fmt"
 	"html/template"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	pkgErr "github.com/pkg/errors"
 )
+
+type ProjectType int
+
+const (
+	TypeAPI ProjectType = iota
+	TypeComponent
+)
+
+var projectTypeMap = map[string]ProjectType{
+	"category": TypeAPI,
+	"comp":     TypeComponent,
+}
+
+var projectFolderMap = map[ProjectType]string{
+	TypeAPI:       "api",
+	TypeComponent: "comp",
+}
 
 type templateSet struct {
 	templateFilePath string
@@ -19,40 +35,41 @@ type templateSet struct {
 }
 
 type data struct {
-	AbsGenProjectPath string // The Abs Gen Project Path
-	ProjectPath       string //The Go import project path (eg:github.com/fooOrg/foo)
-	ProjectName       string //The project name which want to generated
-	Signal            string
+	RootPath    string
+	ProjectType string
+	ProjectPath string //The Go import project path (eg:github.com/fooOrg/foo)
+	ProjectName string //The project name which want to generate
+	Signal      string
 }
 
 type ProjectGenerator struct {
 	f embed.FS
+	data
 }
 
-func NewProjectGenerator(f embed.FS) *ProjectGenerator {
-	return &ProjectGenerator{f: f}
+func NewProjectGenerator(f embed.FS, appName string, projType ProjectType) ProjectGenerator {
+	rootPath, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	return ProjectGenerator{
+		f: f,
+		data: data{
+			ProjectType: projectFolderMap[projType],
+			ProjectPath: "github.com/17media/" + appName,
+			ProjectName: appName,
+			RootPath:    filepath.Join(rootPath, appName),
+			Signal:      "<-sig",
+		},
+	}
 }
 
 func (g *ProjectGenerator) Generate() error {
-	currPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	projectName := filepath.Base(currPath)
-	if err != nil {
-		return err
-	}
 	templateSets, err := g.getTemplates()
 	if err != nil {
-		fmt.Println("getTemplates: ", err.Error())
+		log.Println("getTemplates: ", err.Error())
 		return err
-	}
-	d := data{
-		AbsGenProjectPath: currPath,
-		ProjectPath:       "github.com/17media/" + projectName,
-		ProjectName:       projectName,
-		Signal:            "<-sig",
 	}
 
 	for _, tmpl := range templateSets {
-		if err = g.gen(tmpl, d); err != nil {
+		if err = g.generate(tmpl); err != nil {
 			return err
 		}
 	}
@@ -60,14 +77,14 @@ func (g *ProjectGenerator) Generate() error {
 }
 
 func (g *ProjectGenerator) getTemplates() ([]templateSet, error) {
-	fmt.Println("getTemplates")
 	var sets []templateSet
-	if err := fs.WalkDir(g.f, ".", func(path string, d fs.DirEntry, err error) error {
+	tempRoot := filepath.Join("templates", getTemplateName(g.ProjectType))
+	if err := fs.WalkDir(g.f, tempRoot, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			fmt.Println("walk fail: ", err.Error())
+			log.Println("walk fail: ", err.Error())
 			return err
 		}
-		relPath, _ := filepath.Rel("templates", path)
+		relPath, _ := filepath.Rel(tempRoot, path)
 		if !d.IsDir() {
 			ext := filepath.Ext(path)
 			fileName := filepath.Base(path)
@@ -85,18 +102,16 @@ func (g *ProjectGenerator) getTemplates() ([]templateSet, error) {
 	return sets, nil
 }
 
-func (g *ProjectGenerator) genFromTemplate(templateSets []templateSet, d data, f embed.FS) error {
-	fmt.Println("genFromTemplate")
+func (g *ProjectGenerator) genFromTemplate(templateSets []templateSet) error {
 	for _, tmpl := range templateSets {
-		fmt.Println(tmpl)
-		if err := g.gen(tmpl, d); err != nil {
+		if err := g.generate(tmpl); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (g *ProjectGenerator) gen(tmplSet templateSet, d data) error {
+func (g *ProjectGenerator) generate(tmplSet templateSet) error {
 	tmpl := template.New(tmplSet.templateFileName)
 	tmpl = tmpl.Funcs(template.FuncMap{"unescaped": func(x string) interface{} {
 		return template.HTML(x)
@@ -110,10 +125,7 @@ func (g *ProjectGenerator) gen(tmplSet templateSet, d data) error {
 	relateDir := filepath.Dir(tmplSet.genFilePath)
 
 	distRelFilePath := filepath.Join(relateDir, filepath.Base(tmplSet.genFilePath))
-	distAbsFilePath := filepath.Join(d.AbsGenProjectPath, distRelFilePath)
-
-	fmt.Printf("distRelFilePath:%s\n", distRelFilePath)
-	fmt.Printf("distAbsFilePath:%s\n", distAbsFilePath)
+	distAbsFilePath := filepath.Join(g.data.RootPath, distRelFilePath)
 
 	if err := os.MkdirAll(filepath.Dir(distAbsFilePath), os.ModePerm); err != nil {
 		return pkgErr.WithStack(err)
@@ -125,16 +137,10 @@ func (g *ProjectGenerator) gen(tmplSet templateSet, d data) error {
 	}
 	defer dist.Close()
 
-	fmt.Printf("Create %s\n", distRelFilePath)
-	return tmpl.Execute(dist, d)
+	log.Printf("Create %s\n", distAbsFilePath)
+	return tmpl.Execute(dist, g.data)
 }
-func wrapFileName(path string, ext string) string {
-	switch ext {
-	case ".ops":
-		return strings.TrimSuffix(path, ext)
-	case ".tmpl":
-		return strings.TrimSuffix(path, ext) + ".go"
-	default:
-		return path
-	}
+
+func ProjectTypeMap() map[string]ProjectType {
+	return projectTypeMap
 }

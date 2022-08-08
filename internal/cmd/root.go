@@ -5,10 +5,15 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+
+	"github.com/17media/autogen/internal/cmd/new"
 )
 
-func Execute(f embed.FS) {
-	rootCmd := cmd(f)
+//go:embed templates
+var files embed.FS
+
+func Execute() {
+	rootCmd := cmd()
 	err := rootCmd.Execute()
 	if err == nil {
 		return
@@ -16,14 +21,14 @@ func Execute(f embed.FS) {
 	os.Exit(-1)
 }
 
-func cmd(f embed.FS) *cobra.Command {
+func cmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		SilenceErrors: true,
 		Use:           "autogen",
 		Short:         "generate project",
 	}
 
-	newCmd := ProvideNewCmd(f)
-	rootCmd.AddCommand(newCmd.Command())
+	newCmd := new.Cmd(files)
+	rootCmd.AddCommand(newCmd.Commend)
 	return rootCmd
 }
