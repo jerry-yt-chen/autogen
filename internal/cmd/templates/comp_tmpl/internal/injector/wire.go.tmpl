@@ -1,0 +1,26 @@
+//go:build wireinject
+// +build wireinject
+
+package injector
+
+import (
+	"github.com/google/wire"
+
+	"github.com/17media/{{.ProjectName}}/internal/injector/api"
+	"github.com/17media/{{.ProjectName}}/internal/injector/domain"
+)
+
+func BuildInjector() (*Injector, error) {
+	wire.Build(
+		// init
+		api.InitGrpcEngine,
+		api.ReceiverSet,
+
+		//domain
+		domain.RepoSet,
+
+		//injector
+		InjectorSet,
+	)
+	return new(Injector), nil
+}

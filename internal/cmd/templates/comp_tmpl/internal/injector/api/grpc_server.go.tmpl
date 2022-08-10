@@ -1,0 +1,10 @@
+package api
+
+import (
+	"github.com/17media/{{.ProjectName}}/internal/framework/engine"
+	"github.com/17media/{{.ProjectName}}/internal/framework/engine/grpc"
+)
+
+func InitGrpcEngine() engine.Engine {
+	return grpc.NewEngine()
+}

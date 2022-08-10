@@ -1,0 +1,9 @@
+package api
+
+import (
+	"github.com/google/wire"
+
+	"github.com/17media/{{.ProjectName}}/internal/receiver/greeter"
+)
+
+var ReceiverSet = wire.NewSet(greeter.ProvideReceiver)

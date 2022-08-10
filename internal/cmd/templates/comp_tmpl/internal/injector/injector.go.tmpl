@@ -1,0 +1,15 @@
+package injector
+
+import (
+	"github.com/google/wire"
+
+	"github.com/17media/{{.ProjectName}}/internal/framework/engine"
+	"github.com/17media/{{.ProjectName}}/internal/receiver/greeter"
+)
+
+var InjectorSet = wire.NewSet(wire.Struct(new(Injector), "*"))
+
+type Injector struct {
+	Engine   engine.Engine
+	Receiver greeter.Receiver
+}

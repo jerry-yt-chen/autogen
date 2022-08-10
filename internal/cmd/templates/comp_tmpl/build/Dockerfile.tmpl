@@ -1,0 +1,49 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.17 as builder
+
+# setup environment
+ARG work_dir=/app
+RUN mkdir -p ${work_dir}/src
+WORKDIR ${work_dir}/src
+
+# build code
+RUN git config --global url."git@github.com:".insteadOf "https://github.com/"
+ENV GOPRIVATE=github.com/17media
+RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN --mount=type=ssh,id=main go mod download
+COPY . ${work_dir}/src
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o cmd/{{.ProjectName}}/main cmd/{{.ProjectName}}/main.go
+
+# In this last stage, we start from a fresh Alpine image, to reduce the image size and not ship the Go compiler in our production artifacts.
+FROM alpine:3.13.2
+ARG work_dir=/app
+WORKDIR ${work_dir}
+RUN mkdir -p ${work_dir}/configs
+
+# install library required by c++ part
+RUN apk --update upgrade && \
+    apk add --no-cache libstdc++ ca-certificates curl tzdata wget && \
+    rm -rf /var/cache/apk/*
+
+## download macgyver
+ENV MACGYVER_VERSION 1.2.4
+RUN wget -4 -q https://github.com/17media/macgyver/releases/download/v${MACGYVER_VERSION}/macgyver.tar.gz -O - | tar -zx
+
+## download grpc health probe
+ARG GRPC_HEALTH_PROBE_VERSION=0.4.10
+RUN wget -q -O /bin/grpc_health_probe "https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/v${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64" && \
+    chmod +x /bin/grpc_health_probe
+
+# copy binary into image
+COPY --from=builder ${work_dir}/src/cmd/{{.ProjectName}}/main ${work_dir}/main
+COPY --from=builder ${work_dir}/src/configs ${work_dir}/configs
+
+# entrypoint
+COPY build/entrypoint.sh ${work_dir}/entrypoint.sh
+RUN chmod -R 755 ${work_dir}/entrypoint.sh
+ENV WORK_DIR ${work_dir}
+ENV CONFIG_FILE "${WORK_DIR}/configs/config.yaml"
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ""

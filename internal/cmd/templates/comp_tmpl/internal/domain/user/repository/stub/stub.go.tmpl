@@ -1,0 +1,22 @@
+package stub
+
+import (
+	"github.com/17media/{{.ProjectName}}/internal/domain/user/entity"
+	"github.com/17media/{{.ProjectName}}/internal/domain/user/repository"
+)
+
+type Repository struct {
+}
+
+func NewStubRepository() repository.Repository {
+	return &Repository{}
+}
+
+func (r Repository) GetGreeter() (entity.User, error) {
+	return entity.User{
+		UserId: "1234",
+		Name:   "Ozzy Osbourne",
+		Age:    74,
+		Gender: "male",
+	}, nil
+}

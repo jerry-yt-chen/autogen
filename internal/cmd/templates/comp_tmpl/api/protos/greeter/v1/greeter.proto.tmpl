@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package greeter.v1;
+
+message User {
+  string name = 1;
+  int32 age = 2;
+}
+
+// The greeting service definition.
+service GreeterService {
+  // Sends a greeting
+  rpc WhoAreYou(WhoAreYouRequest) returns (WhoAreYouResponse) {}
+}
+
+message WhoAreYouRequest {
+  string iam = 1;
+}
+
+message WhoAreYouResponse {
+  string message = 1;
+  User user = 2;
+}
